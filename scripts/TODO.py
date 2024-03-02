@@ -57,7 +57,7 @@ class ToDo(scripts.Script):
         with gr.Accordion(open=False, label=self.title()):
             todo_enabled = gr.Checkbox(label='Enabled', value=False)
             #todo_enabled_hr = gr.Checkbox(label='Enable only during hires fix', value=False)
-            todo_downsample_method = gr.Dropdown(label="Downsample method", choices=["nearest", "linear", "bilinear", "bicubic", "nearest-exact"], value="nearest")
+            todo_downsample_method = gr.Dropdown(label="Downsample method", choices=["nearest", "bilinear", "bicubic", "nearest-exact", "area"], value="nearest")
             todo_downsample_factor_depth_1 = gr.Slider(label='Downsample Factor Depth 1', minimum=1.0, maximum=10.0, step=0.01, value=2.0)
             todo_downsample_factor_depth_2 = gr.Slider(label='Downsample Factor Depth 2', minimum=1.0, maximum=10.0, step=0.01, value=1.0)
         self.infotext_fields = (
@@ -99,7 +99,7 @@ class ToDo(scripts.Script):
         return
 		
     def postprocess(self, p, processed, *args):
-        todo_enabled, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = args
+        todo_enabled, todo_downsample_method, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = args
         #remove_patch(shared.sd_model)
         return
 
