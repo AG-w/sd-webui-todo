@@ -164,7 +164,7 @@ def apply_patch(
             module._todo_info = diffusion_model._todo_info
 
             # Something introduced in SD 2.0 (LDM only)
-            if not hasattr(module, "disable_self_attn") and not is_diffusers:
+            if not hasattr(module, "disable_self_attn"):
                 module.disable_self_attn = False
 
     return model
