@@ -25,18 +25,18 @@ def compute_merge(x: torch.Tensor, todo_info: Dict[str, Any]) -> Tuple[Callable,
     downsample_factor_2 = args['downsample_factor_level_2']	
     downsample_factor_3 = args['downsample_factor_level_3']
 	
-    cur_h = original_h // downsample
-    cur_w = original_w // downsample
+    cur_h = math.ceil(original_h / downsample)
+    cur_w = math.ceil(original_w / downsample)
     m = lambda v: v
-    if downsample == 1 and downsample_factor_1 > 1:
+    if downsample == 1 and downsample_factor_1 != 1:
         new_h = int(cur_h / downsample_factor_1)
         new_w = int(cur_w / downsample_factor_1)
         m = lambda v: up_or_downsample(v, cur_w, cur_h, new_w, new_h, args["downsample_method"])	
-    elif downsample == 2 and downsample_factor_2 > 1:
+    elif downsample == 2 and downsample_factor_2 != 1:
         new_h = int(cur_h / downsample_factor_2)
         new_w = int(cur_w / downsample_factor_2)
         m = lambda v: up_or_downsample(v, cur_w, cur_h, new_w, new_h, args["downsample_method"])
-    elif downsample == 4 and downsample_factor_3 > 1:
+    elif downsample == 4 and downsample_factor_3 != 1:
         new_h = int(cur_h / downsample_factor_3)
         new_w = int(cur_w / downsample_factor_3)
         m = lambda v: up_or_downsample(v, cur_w, cur_h, new_w, new_h, args["downsample_method"])
@@ -58,8 +58,8 @@ class ToDo(scripts.Script):
             todo_enabled = gr.Checkbox(label='Enabled', value=False)
             #todo_enabled_hr = gr.Checkbox(label='Enable only during hires fix', value=False)
             todo_downsample_method = gr.Dropdown(label="Downsample method", choices=["nearest", "bilinear", "bicubic", "nearest-exact"], value="nearest-exact")
-            todo_downsample_factor_depth_1 = gr.Slider(label='Downsample Factor Depth 1', minimum=1.0, maximum=10.0, step=0.01, value=2.0)
-            todo_downsample_factor_depth_2 = gr.Slider(label='Downsample Factor Depth 2', minimum=1.0, maximum=10.0, step=0.01, value=1.0)
+            todo_downsample_factor_depth_1 = gr.Slider(label='Downsample Factor Depth 1', minimum=0.01, maximum=8.0, step=0.01, value=2.0)
+            todo_downsample_factor_depth_2 = gr.Slider(label='Downsample Factor Depth 2', minimum=0.01, maximum=8.0, step=0.01, value=1.0)
         self.infotext_fields = (
             (todo_enabled, lambda d: gr.Checkbox.update(value="todo_enabled" in d)),
             (todo_downsample_method, "todo_downsample_method"),
