@@ -6,7 +6,7 @@ from modules import scripts
 from modules import shared
 from typing import Type, Dict, Any, Tuple, Callable
 
-def up_or_downsample(item, cur_w, cur_h, new_w, new_h, method="nearest"):
+def up_or_downsample(item, cur_w, cur_h, new_w, new_h, method="nearest-exact"):
     batch_size = item.shape[0]
 
     item = item.reshape(batch_size, cur_h, cur_w, -1).permute(0, 3, 1, 2)
