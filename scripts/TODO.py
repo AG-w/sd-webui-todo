@@ -53,7 +53,7 @@ class ToDo(scripts.Script):
     def show(self, is_img2img):
         return scripts.AlwaysVisible
 
-    def ui(self, *args, **kwargs):
+    def ui_bk(self, *args, **kwargs):
         with gr.Accordion(open=False, label=self.title()):
             todo_enabled = gr.Checkbox(label='Enabled', value=False)
             #todo_enabled_hr = gr.Checkbox(label='Enable only during hires fix', value=False)
@@ -71,37 +71,56 @@ class ToDo(scripts.Script):
         #self.is_in_high_res_fix = True
 
     def process(self, p, *script_args, **kwargs):
-        todo_enabled, todo_downsample_method, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = script_args
+        #todo_enabled, todo_downsample_method, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = script_args
 
         #if not p.enable_hr:
             #self.is_in_high_res_fix = False
 
-        if not todo_enabled:
+        _todo_enabled = shared.opts.todo_enable
+            
+        if not _todo_enabled:
             return
 
         #if todo_enabled_hr and not self.is_in_high_res_fix:
             #return
 
+        _todo_downsample_method = shared.opts.todo_downsample_method
+        _todo_downsample_factor_depth_1 = shared.opts.todo_downsample_factor_depth_1
+        _todo_downsample_factor_depth_2 = shared.opts.todo_downsample_factor_depth_2
+            
         apply_patch(
             shared.sd_model, 
-            downsample_factor = todo_downsample_factor_depth_1, 
-            downsample_factor_level_2 = todo_downsample_factor_depth_2, 
-            downsample_method = todo_downsample_method)
+            downsample_factor = _todo_downsample_factor_depth_1, 
+            downsample_factor_level_2 = _todo_downsample_factor_depth_2, 
+            downsample_method = _todo_downsample_method)
 
 
-        p.extra_generation_params["todo_enabled"] = todo_enabled
-        p.extra_generation_params["todo_downsample_method"] = todo_downsample_method
-        p.extra_generation_params["todo_downsample_factor_depth_1"] = todo_downsample_factor_depth_1
-        p.extra_generation_params["todo_downsample_factor_depth_2"] = todo_downsample_factor_depth_2
+        p.extra_generation_params["todo_enabled"] = _todo_enabled
+        p.extra_generation_params["todo_downsample_method"] = _todo_downsample_method
+        p.extra_generation_params["todo_downsample_factor_depth_1"] = _todo_downsample_factor_depth_1
+        p.extra_generation_params["todo_downsample_factor_depth_2"] = _todo_downsample_factor_depth_2
 
         #self.is_in_high_res_fix = False
 
         return
 		
     def postprocess(self, p, processed, *args):
-        todo_enabled, todo_downsample_method, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = args
-        #remove_patch(shared.sd_model)
+        #todo_enabled, todo_downsample_method, todo_downsample_factor_depth_1, todo_downsample_factor_depth_2 = args
+        remove_patch(shared.sd_model)
         return
+
+def ext_on_ui_settings():
+    options = {
+        "todo_enable": shared.OptionInfo(False, "Enable Token downsampling", infotext="todo enable"),
+        "todo_downsample_method": shared.OptionInfo("nearest-exact", "Downsampling method", gr.Dropdown, lambda: {"choices": ["nearest-exact", "bilinear", "bicubic", "nearest"]}, infotext="todo downsample method"),
+        "todo_downsample_factor_depth_1": shared.OptionInfo(1.0, "Downsample factor depth 1", gr.Slider, {"minimum": 0.01, "maximum": 8.0, "step": 0.01}, infotext="todo downsample factor depth 1"),
+        "todo_downsample_factor_depth_2": shared.OptionInfo(1.0, "Downsample factor depth 2", gr.Slider, {"minimum": 0.01, "maximum": 8.0, "step": 0.01}, infotext="todo downsample factor depth 2"),
+    }
+    for name, opt in options.items():
+        opt.section = ('todo', "ToDo")
+        shared.opts.add_option(name, opt)
+
+on_ui_settings(ext_on_ui_settings)
 
 def make_todo_block(block_class: Type[torch.nn.Module]) -> Type[torch.nn.Module]:
     """
